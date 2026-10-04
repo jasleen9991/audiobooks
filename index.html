@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c1730" id="themeColor">
+<title>JK's Audiobooks</title>
+<style>
+:root{--amber:#f7941d;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif}
+[data-theme=night]{
+  --top:#7d8593;
+  --grad:linear-gradient(180deg,#7d8593 0%,#2b3b58 30%,#13294b 56%,#0c1730 100%);
+  --text:#f4f6fb;--mute:#a3b2cc;--pill:rgba(160,184,230,.6);--track:rgba(255,255,255,.26);
+  --play:#f6f4f0;--playink:#16315c;--panel:#0f1d36;--field:rgba(255,255,255,.08);--line:rgba(255,255,255,.13);--chip:rgba(255,255,255,.1);--tint:.5
+}
+[data-theme=day]{
+  --top:#e4e3e6;
+  --grad:linear-gradient(180deg,#e4e3e6 0%,#f3f2f1 34%,#ffffff 100%);
+  --text:#25242b;--mute:#6d6b75;--pill:#8f8d97;--track:rgba(0,0,0,.16);
+  --play:#4b4a51;--playink:#ffffff;--panel:#f7f6f4;--field:rgba(0,0,0,.05);--line:rgba(0,0,0,.1);--chip:rgba(0,0,0,.07);--tint:.18
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background-color:var(--top)}
+html,body{margin:0;min-height:100%;color:var(--text);font-family:var(--sans)}
+body{background:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+svg{display:block}
+.bg{position:fixed;inset:0;background:var(--grad);z-index:0}
+.tint{position:fixed;left:0;right:0;top:0;height:58dvh;background:center/cover no-repeat;transform:scale(1.3);filter:blur(46px) saturate(1.15);opacity:0;z-index:0;
+  -webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent);transition:opacity .5s}
+.tint.on{opacity:var(--tint)}
+main{position:relative;z-index:1;max-width:440px;margin:0 auto;min-height:100dvh;padding:max(10px,env(safe-area-inset-top)) 20px max(16px,env(safe-area-inset-bottom));display:flex;flex-direction:column}
+
+/* header */
+header{display:flex;align-items:center;gap:8px;height:48px}
+.ib{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--chip);flex:none}
+.ib:active{opacity:.7}
+.sp{flex:1}
+.hello{padding:9px 14px;border-radius:999px;background:var(--chip);font-size:13px;font-weight:600;transition:opacity .3s;white-space:nowrap}
+.hello.fade{opacity:0}
+
+/* link bar */
+.linkbar{margin:8px 0 4px}
+.lb-pill{display:flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--pill);font-size:13px;font-weight:600;margin:0 auto}
+.lb-form{display:flex;gap:8px}
+.lb-form input{flex:1;min-width:0;height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--field);color:var(--text);font-size:16px}
+.lb-form input::placeholder{color:var(--mute)}
+.lb-go{height:44px;padding:0 18px;border-radius:12px;background:var(--amber);color:#1d1204;font-weight:700}
+.linkbar.min .lb-form{display:none}
+.linkbar:not(.min) .lb-pill{display:none}
+.lb-x.hide{display:none}
+.lb-file{margin:8px auto 0;display:block}
+.linkbar.min .lb-file{display:none}
+
+/* stage */
+.stage{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px;padding-top:6px}
+.cover{--h:min(40dvh,76vw);--ar:1;height:var(--h);width:calc(var(--h)*var(--ar));margin:0 auto;border-radius:8px;overflow:hidden;position:relative;background:var(--field);box-shadow:0 16px 38px rgba(0,0,0,.4)}
+.cover img{width:100%;height:100%;object-fit:cover;display:none}
+.cover.has img{display:block}
+.ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:26px;color:var(--mute);font-size:15px;line-height:1.45}
+.cover.has .ph{display:none}
+.meta{text-align:center;min-height:52px;padding:0 6px}
+.meta .t{font-weight:700;font-size:18px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.eng{display:inline-block;margin-top:7px;padding:3px 11px;border-radius:999px;font-size:11.5px;font-weight:700;background:var(--chip)}
+.eng:empty{display:none}
+.eng.ok{color:#2fbf71}
+.eng.no{color:#e8892b;cursor:pointer}
+.steps{margin:6px 0 12px;padding-left:20px;line-height:1.65;font-size:14px}
+.tg{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;font-weight:600}
+.tg .chiprow{margin:0;justify-content:flex-end}
+.linkbtn{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.meta .a{margin-top:3px;color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.pill{height:34px;padding:0 14px;border-radius:999px;border:1.5px solid var(--pill);font-size:13px;font-weight:600}
+.pill:active{opacity:.7}
+.prog{padding:0 2px}
+.times{display:flex;justify-content:space-between;color:var(--mute);font-size:12.5px;font-variant-numeric:tabular-nums}
+.times #mid{color:var(--text);opacity:.85}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;margin:0;display:block}
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(to right,var(--amber) var(--p,0%),var(--track) var(--p,0%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--amber);margin-top:-5px;border:0}
+input[type=range]::-moz-range-track{height:3px;border-radius:2px;background:var(--track)}
+input[type=range]::-moz-range-progress{height:3px;border-radius:2px;background:var(--amber)}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--amber);border:0}
+.ctrl{display:flex;align-items:center;justify-content:space-between;padding:0 2px}
+.ctrl .sk,.ctrl .tr{width:48px;height:48px;display:grid;place-items:center;border-radius:50%}
+.ctrl button:active{opacity:.7}
+.big{width:74px;height:74px;border-radius:50%;background:var(--play);color:var(--playink);display:grid;place-items:center}
+.big:active{transform:scale(.96)}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);max-width:360px;width:100%;margin:4px auto 0}
+.act{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;font-size:12px;font-weight:600}
+.act .v{height:24px;display:grid;place-items:center;font-size:16px;font-weight:700}
+.act.on{color:var(--amber)}
+.vid{margin-top:8px;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:16/9;position:relative}
+.vid.off{position:fixed;left:-400px;bottom:0;width:220px;height:220px;aspect-ratio:auto;margin:0}
+.vid iframe{width:100%;height:100%;border:0}
+.vid-skip{position:absolute;left:0;right:0;bottom:12px;z-index:3;display:flex;justify-content:center;gap:18px;pointer-events:none}
+.vid-skip button{pointer-events:auto;width:54px;height:54px;border-radius:50%;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.35);color:#fff;display:grid;place-items:center;font-weight:800;font-size:11px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.vid-skip button:active{transform:scale(.94);opacity:.85}
+.vid-skip .skip-arrow{font-size:18px;line-height:1}
+.vid-skip .skip-num{font-size:10px;margin-top:-2px}
+
+
+/* overlays */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:5}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;left:0;top:0;bottom:0;width:min(90vw,400px);z-index:6;background:var(--panel);transform:translateX(-105%);transition:transform .25s ease;display:flex;flex-direction:column;padding:max(12px,env(safe-area-inset-top)) 0 max(12px,env(safe-area-inset-bottom));box-shadow:8px 0 30px rgba(0,0,0,.35)}
+.drawer.open{transform:none}
+.dr-h{display:flex;align-items:center;justify-content:space-between;padding:0 16px 8px}
+.brand{font:700 22px/1 var(--serif)}
+.seg{display:flex;gap:6px;padding:4px 16px 10px}
+.seg button{flex:1;height:36px;border-radius:999px;border:1.5px solid var(--pill);font-size:14px;font-weight:600}
+.seg button.on{background:var(--amber);border-color:var(--amber);color:#1d1204}
+.dr-b{flex:1;overflow:auto;padding:0 16px 16px}
+.cnt{font-weight:700;font-size:14px;padding:8px 0 4px}
+.empty{color:var(--mute);font-size:14px;text-align:center;padding:30px 10px;line-height:1.5}
+.bk{display:flex;align-items:center;gap:6px;padding:10px 0}
+.bk.cur .bt{color:var(--amber)}
+.bk-main{flex:1;min-width:0;display:flex;align-items:center;gap:12px;text-align:left}
+.th{width:62px;height:62px;border-radius:6px;object-fit:cover;background:var(--field);flex:none}
+.bi{min-width:0;flex:1}
+.bt{font-weight:700;font-size:14px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ba{font-size:13px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bm{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mute);margin-top:4px}
+.bar{width:64px;height:3px;border-radius:2px;background:var(--track);overflow:hidden;flex:none}
+.bar i{display:block;height:100%;background:var(--amber)}
+.pl{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--pill);display:grid;place-items:center;flex:none}
+.bk .ib{background:none;width:34px}
+.stabs{display:flex;gap:6px;margin:6px 0 14px;flex-wrap:wrap}
+.stabs button{height:34px;padding:0 14px;border-radius:8px;border:1.5px solid var(--pill);font-size:13px;font-weight:600}
+.stabs button.on{border-color:#6fa0ff;background:rgba(111,160,255,.18)}
+.slabel{text-align:center;font-size:11.5px;letter-spacing:.06em;color:var(--mute);font-weight:700;text-transform:uppercase}
+.sdate{text-align:center;font-weight:700;font-size:17px;margin-top:2px}
+.bigt{display:flex;justify-content:center;gap:26px;margin:22px 0 10px;text-align:center}
+.bigt b{display:block;font-size:38px;line-height:1.1}
+.bigt span{font-size:13px;color:var(--mute)}
+.avg{text-align:center;font-weight:800;font-size:28px;margin:6px 0 2px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.fact{background:var(--field);border-radius:12px;padding:12px;text-align:center}
+.fact b{display:block;font-size:22px}
+.fact span{font-size:12.5px;color:var(--mute)}
+.note{color:var(--mute);font-size:12.5px;text-align:center;margin-top:10px;line-height:1.45}
+
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:6;max-width:440px;margin:0 auto;max-height:88dvh;overflow:auto;background:var(--panel);border-radius:20px 20px 0 0;padding:16px 18px max(22px,env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .25s ease;box-shadow:0 -10px 40px rgba(0,0,0,.35)}
+.sheet.open{transform:none}
+.sh-h{font-weight:800;font-size:18px;margin-bottom:12px;line-height:1.3}
+.dcov{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.dc{width:112px;height:112px;border-radius:8px;overflow:hidden;background:var(--field);flex:none}
+.dc img{width:100%;height:100%;object-fit:cover}
+.dbtns{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.fl{display:block;font-size:12.5px;color:var(--mute);font-weight:600;margin-bottom:10px}
+.fl input{display:block;width:100%;height:46px;margin-top:5px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--field);color:var(--text);font-size:16px;font-weight:500}
+.primary{width:100%;height:50px;border-radius:14px;background:var(--amber);color:#1d1204;font-weight:800;font-size:16px;margin-top:6px}
+.ghost{width:100%;height:44px;color:var(--mute);font-weight:600;margin-top:2px}
+.opt{display:block;width:100%;text-align:left;padding:14px 4px;border-bottom:1px solid var(--line);font-weight:600}
+.opt.danger{color:#ff6b6b;border:0}
+.row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.row .go{flex:1;text-align:left}
+.row .tt{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.row .ss{font-size:12px;color:var(--mute);margin-top:2px}
+.x{width:36px;height:36px;color:var(--mute);font-size:22px;line-height:1}
+.add{width:100%;height:44px;border-radius:12px;border:1.5px dashed var(--amber);color:var(--amber);font-weight:700;margin-bottom:6px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:#2d2639;color:#f4f1f8;border:1px solid rgba(255,255,255,.14);padding:10px 16px;border-radius:12px;font-size:14px;max-width:88vw;opacity:0;pointer-events:none;transition:.25s;z-index:9;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.bigval{font-size:46px;font-weight:800;text-align:center;margin:4px 0 8px;font-variant-numeric:tabular-nums}
+.ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--mute)}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0 10px}
+.chip{height:36px;padding:0 14px;border-radius:999px;border:1.5px solid var(--pill);font-weight:600;font-size:14px}
+.chip.on{background:var(--amber);border-color:var(--amber);color:#1d1204}
+.findbar{display:flex;gap:8px;margin:4px 0 8px}
+.findbar input{flex:1;min-width:0;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--field);color:var(--text);font-size:16px}
+</style>
+<script>(function(){try{var t=JSON.parse(localStorage.getItem('katha.theme'));if(!t){var h=new Date().getHours();t=(h>=19||h<6)?'night':'day'}document.documentElement.dataset.theme=t;document.getElementById('themeColor').content=t==='night'?'#7d8593':'#e4e3e6'}catch(e){}})()</script>
+</head>
+<body>
+<div class="bg"></div>
+<div class="tint" id="tint"></div>
+
+<main>
+  <header>
+    <button class="ib" id="menuBtn" aria-label="Open library">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+    </button>
+    <div class="sp"></div>
+    <button class="ib" id="themeBtn" aria-label="Switch day and night view"></button>
+    <div class="hello" id="hello">Welcome, JK</div>
+  </header>
+
+  <div class="linkbar" id="linkbar">
+    <button class="lb-pill" id="lbOpen">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
+      Add a book
+    </button>
+    <div class="lb-form">
+      <input id="link" type="url" inputmode="url" placeholder="Paste a YouTube or audio link" aria-label="Book link">
+      <button class="lb-go" id="go">Add</button>
+      <button class="ib lb-x" id="lbClose" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <button class="pill lb-file" id="pickAudio">Choose an audio file</button>
+  </div>
+
+  <section class="stage">
+    <div class="cover" id="cover">
+      <img id="art" alt="Cover">
+      <div class="ph">Paste a YouTube or audio link, or choose an audio file, to start listening</div>
+    </div>
+
+    <div class="meta">
+      <div class="t" id="title"></div>
+      <div class="a" id="author"></div>
+      <div class="eng" id="engBadge"></div>
+    </div>
+
+    <div class="pills">
+      <button class="pill" id="pClips">Clips</button>
+      <button class="pill" id="pDetails">Title details</button>
+      <button class="pill" id="pLog">Listen log</button>
+    </div>
+
+    <div class="prog">
+      <input type="range" id="seek" min="0" max="100" step="1" value="0" aria-label="Seek">
+      <div class="times"><span id="cur">0:00</span><span id="mid"></span><span id="rem"></span></div>
+    </div>
+
+    <div class="ctrl">
+      <button class="tr" id="prev" aria-label="Previous clip">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5h2v14H5zM19 5v14L8 12z"/></svg>
+      </button>
+      <button class="sk" id="back" aria-label="Back 15 seconds">
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4v5h5"/><path d="M3.5 13a9 9 0 1 0 2.6-6.4L3 9"/><text x="12" y="15.4" font-size="7.5" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">15</text></svg>
+      </button>
+      <button class="big" id="pp" aria-label="Play">
+        <svg id="ico" width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="sk" id="fwd" aria-label="Forward 15 seconds">
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4v5h-5"/><path d="M20.5 13a9 9 0 1 1-2.6-6.4L21 9"/><text x="12" y="15.4" font-size="7.5" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">15</text></svg>
+      </button>
+      <button class="tr" id="next" aria-label="Next clip">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M17 5h2v14h-2zM5 5v14l11-7z"/></svg>
+      </button>
+    </div>
+
+    <div class="acts">
+      <button class="act" id="speed"><span class="v" id="speedv">1×</span>Speed</button>
+      <button class="act" id="sleep"><span class="v"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7"/><path d="M12 10v4l2.5 1.5M9.5 3h5M12 3v3.5"/></svg></span><span id="sleepl">Timer</span></button>
+      <button class="act" id="clip"><span class="v"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/><path d="M12 7.5v5M9.5 10h5"/></svg></span>+ Clip</button>
+    </div>
+
+    <div class="vid off" id="vid">
+      <div id="yt"></div>
+      <div class="vid-skip" aria-label="Seek controls">
+        <button type="button" id="vidBack" aria-label="Back 15 seconds"><span class="skip-arrow">↶</span><span class="skip-num">15</span></button>
+        <button type="button" id="vidFwd" aria-label="Forward 15 seconds"><span class="skip-arrow">↷</span><span class="skip-num">15</span></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Library"></aside>
+<div class="sheet" id="sheet" role="dialog"></div>
+<input type="file" id="file" accept="image/*" hidden>
+<input type="file" id="afile" accept="audio/*,.mp3,.m4a,.m4b,.aac,.ogg,.opus,.wav,.flac" hidden>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const store = {
+  get(k, d){ try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? d : v; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
+};
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = s => {
+  s = Math.max(0, Math.floor(s || 0));
+  const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60;
+  return (h ? h + ':' + String(m).padStart(2,'0') : m) + ':' + String(x).padStart(2,'0');
+};
+const leftFmt = s => { const m = Math.max(0, Math.round(s/60)), h = Math.floor(m/60); return h ? `${h}h ${m%60}m left` : `${m}m left`; };
+const short = s => s < 3600 ? Math.round(s/60) + 'm' : (s/3600).toFixed(1).replace('.0','') + 'h';
+const dkey = d => { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+const thumbHi = id => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+const thumbLo = id => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 3400);
+}
+
+/* ---------- saved data ---------- */
+const getLib = () => store.get('katha.lib', {});
+const setLib = l => store.set('katha.lib', l);
+const getCover = id => { try { return localStorage.getItem('katha.cover.' + id); } catch(e){ return null; } };
+const setCover = (id, d) => { try { localStorage.setItem('katha.cover.' + id, d); return true; } catch(e){ toast('Storage is full, so the cover was not saved.'); return false; } };
+const delCover = id => { try { localStorage.removeItem('katha.cover.' + id); } catch(e){} };
+const bmKey = id => 'katha.clips.' + id;
+let stats = store.get('katha.stats', {});
+
+/* ---------- state ---------- */
+let yt = null, ready = false, pending = null, vid = null, eng = 'yt';
+let playing = false, wantPlay = false, dragging = false, hiddenAt = 0, lastSave = 0, listenStart = 0;
+let rate = store.get('katha.rate', 1);
+const ytRates = [0.75, 1, 1.25, 1.5, 1.75, 2];
+const auRates = [0.75, 1, 1.25, 1.5, 1.7, 1.8, 2, 2.5, 3];
+if (!(rate >= 0.5 && rate <= 3)) rate = 1;
+const rates = () => eng === 'audio' ? auRates : ytRates;
+const snap = r => eng === 'audio' ? Math.min(3, Math.max(0.5, Math.round(r * 20) / 20)) : ytRates.reduce((a, b) => Math.abs(b - r) < Math.abs(a - r) ? b : a);
+let draft = null, dTab = 'lib', sTab = 'today';
+let ytNative = store.get('katha.ytnative', true);      /* YouTube books: let YouTube's own lock-screen card handle the controls */
+let keepAwake = store.get('katha.awake', false);       /* YouTube books: keep the screen on so the page is never suspended */
+let wl = null;
+async function wlOn(){ try { if (keepAwake && 'wakeLock' in navigator && !wl && !document.hidden){ wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => { wl = null; }); } } catch(e){} }
+function wlOff(){ try { wl && wl.release(); } catch(e){} wl = null; }
+
+/* ---------- audio engine: real audio files / links play in the background like Audible ---------- */
+/* a real <audio> element in the page (not a detached one): iOS ties the lock-screen player to it more reliably */
+const au = document.createElement('audio');
+au.preload = 'metadata'; au.controls = false;
+au.setAttribute('playsinline', ''); au.setAttribute('webkit-playsinline', '');
+au.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
+document.body.appendChild(au);
+const blobs = {};
+let silentUrl = null;
+const kindOf = id => { const b = getLib()[id]; return b && b.kind === 'audio' ? 'audio' : 'yt'; };
+const live = () => eng === 'audio' || ready;
+/* a book is one or more audio files ("tracks"); we treat them as one long timeline */
+let curTracks = [], curTrk = 0;
+const tracksOf = b => (b.tracks && b.tracks.length) ? b.tracks.map(t => ({...t})) : [b.local ? {local:true, d:b.dur || 0} : {u:b.src, d:b.dur || 0}];
+const baseOf = i => curTracks.slice(0, i).reduce((a, t) => a + (t.d || 0), 0);
+function auDuration(){
+  const d = au.duration;
+  if (isFinite(d) && d > 0) return d;
+  try { if (au.seekable && au.seekable.length){ const e = au.seekable.end(au.seekable.length - 1); if (isFinite(e) && e > 0) return e; } } catch(e){}
+  return 0;
+}
+const totalOf = () => { const s = curTracks.reduce((a, t) => a + (t.d || 0), 0); return s || auDuration(); };
+
+/* Some audio files don't store their length. We read it from the file ourselves. */
+function mp3Dur(b, size){
+  const BR1 = [0,32,40,48,56,64,80,96,112,128,160,192,224,256,320], BR2 = [0,8,16,24,32,40,48,56,64,80,96,112,128,144,160];
+  const SR = {3:[44100,48000,32000], 2:[22050,24000,16000], 0:[11025,12000,8000]};
+  const u32 = o => ((b[o] << 24) | (b[o+1] << 16) | (b[o+2] << 8) | b[o+3]) >>> 0;
+  const tag4 = o => String.fromCharCode(b[o], b[o+1], b[o+2], b[o+3]);
+  const hdr = i => {                       /* read one MP3 frame header, or null if it isn't one */
+    if (i < 0 || i + 4 > b.length || b[i] !== 0xFF || (b[i+1] & 0xE0) !== 0xE0) return null;
+    const ver = (b[i+1] >> 3) & 3, layer = (b[i+1] >> 1) & 3, brI = (b[i+2] >> 4) & 15, srI = (b[i+2] >> 2) & 3;
+    if (ver === 1 || layer !== 1 || brI === 0 || brI === 15 || srI === 3) return null;
+    const v1 = ver === 3, br = (v1 ? BR1 : BR2)[brI] * 1000, sr = SR[ver][srI], pad = (b[i+2] >> 1) & 1;
+    return {v1, ver, br, sr, spf:v1 ? 1152 : 576, mono:(b[i+3] >> 6) === 3, len:Math.floor((v1 ? 144 : 72) * br / sr) + pad};
+  };
+  for (let i = 0; i < b.length - 4; i++){
+    const h = hdr(i); if (!h) continue;
+    const n = hdr(i + h.len);              /* a real frame is followed by another real frame */
+    if (!n || n.sr !== h.sr || n.ver !== h.ver) continue;
+    const x = i + 4 + (h.v1 ? (h.mono ? 17 : 32) : (h.mono ? 9 : 17));
+    const tg = tag4(x);
+    if ((tg === 'Xing' || tg === 'Info') && (b[x+7] & 1)) return u32(x + 8) * h.spf / h.sr;
+    if (tag4(i + 36) === 'VBRI') return u32(i + 50) * h.spf / h.sr;
+    /* no length header: average the bitrate over the frames we can see, then extrapolate */
+    let p = i, cnt = 0, bits = 0;
+    while (cnt < 600){ const g = hdr(p); if (!g) break; bits += g.br; cnt++; p += g.len; }
+    return (size - i) * 8 / (cnt ? bits / cnt : h.br);
+  }
+  return 0;
+}
+function adtsDur(b, size){                 /* raw .aac files */
+  const SRT = [96000,88200,64000,48000,44100,32000,24000,22050,16000,12000,11025,8000,7350];
+  for (let i = 0; i < b.length - 7; i++){
+    if (b[i] !== 0xFF || (b[i+1] & 0xF6) !== 0xF0) continue;
+    const sr = SRT[(b[i+2] >> 2) & 15]; if (!sr) continue;
+    let p = i, n = 0;
+    while (p + 7 < b.length && b[p] === 0xFF && (b[p+1] & 0xF6) === 0xF0){
+      const l = ((b[p+3] & 3) << 11) | (b[p+4] << 3) | (b[p+5] >> 5); if (l < 7) break; p += l; n++;
+    }
+    if (n < 8) continue;
+    return (size - i) / ((p - i) / n) * 1024 / sr;
+  }
+  return 0;
+}
+function wavDur(b, size){
+  const dv = new DataView(b.buffer, b.byteOffset, b.byteLength); let p = 12, rate = 0;
+  while (p + 8 <= b.length){
+    const id = String.fromCharCode(b[p], b[p+1], b[p+2], b[p+3]), sz = dv.getUint32(p + 4, true);
+    if (id === 'fmt ') rate = dv.getUint32(p + 16, true);
+    if (id === 'data') return rate ? Math.min(sz, size - p - 8) / rate : 0;
+    p += 8 + sz + (sz & 1);
+  }
+  return 0;
+}
+async function mp4Dur(blob){
+  const size = blob.size, rd = async (o, n) => new DataView(await blob.slice(o, o + n).arrayBuffer());
+  const tp = (dv, o) => String.fromCharCode(dv.getUint8(o), dv.getUint8(o+1), dv.getUint8(o+2), dv.getUint8(o+3));
+  let off = 0;
+  while (off + 8 <= size){
+    const dv = await rd(off, 16); let len = dv.getUint32(0), hdr = 8; const type = tp(dv, 4);
+    if (len === 1){ len = dv.getUint32(8) * 4294967296 + dv.getUint32(12); hdr = 16; } else if (len === 0) len = size - off;
+    if (len < 8) break;
+    if (type === 'moov'){
+      let c = off + hdr, ts = 0, d = 0, frag = 0; const end = off + len;
+      while (c + 8 <= end){
+        const cd = await rd(c, 16), cl = cd.getUint32(0), ct = tp(cd, 4);
+        if (cl < 8) break;
+        if (ct === 'mvhd'){
+          if (cd.getUint8(8) === 1){ const m = await rd(c + 8, 36); ts = m.getUint32(20); d = m.getUint32(24) * 4294967296 + m.getUint32(28); }
+          else { const m = await rd(c + 8, 24); ts = m.getUint32(12); d = m.getUint32(16); }
+        }
+        if (ct === 'mvex'){
+          const md = await rd(c + 8, 24);
+          if (tp(md, 4) === 'mehd') frag = md.getUint8(8) === 1 ? md.getUint32(12) * 4294967296 + md.getUint32(16) : md.getUint32(12);
+        }
+        c += cl;
+      }
+      return ts ? (d || frag) / ts : 0;
+    }
+    off += len;
+  }
+  return 0;
+}
+async function probeDuration(blob){
+  try {
+    const f = new Uint8Array(await blob.slice(0, 12).arrayBuffer());
+    const t4 = o => String.fromCharCode(f[o], f[o+1], f[o+2], f[o+3]);
+    if (t4(4) === 'ftyp') return await mp4Dur(blob);
+    if (t4(0) === 'RIFF') return wavDur(new Uint8Array(await blob.slice(0, 65536).arrayBuffer()), blob.size);
+    let skipTo = 0;
+    if (f[0] === 0x49 && f[1] === 0x44 && f[2] === 0x33){
+      skipTo = 10 + (((f[6] & 127) << 21) | ((f[7] & 127) << 14) | ((f[8] & 127) << 7) | (f[9] & 127));
+      if (f[5] & 0x10) skipTo += 10;
+    }
+    const body = new Uint8Array(await blob.slice(skipTo, skipTo + 262144).arrayBuffer());
+    return mp3Dur(body, blob.size - skipTo) || adtsDur(body, blob.size - skipTo);
+  } catch(e){ return 0; }
+}
+/* one place that applies a length we worked out, and refreshes the screen + lock screen */
+function applyDur(id, x){
+  if (!(x > 0)) return;
+  const l = getLib(), b = l[id];
+  if (b && !(b.dur > 0)){ b.dur = x; setLib(l); }
+  if (vid === id){
+    if (curTracks.length === 1 && !(curTracks[0].d > 0)) curTracks[0].d = x;
+    paint(E.time(), totalOf()); renderDrawerIfOpen(); syncPos(); setSession(true);
+  }
+}
+/* iOS only treats a file as proper audio (length, lock screen) when it knows the file type */
+async function typed(blob){
+  try {
+    const f = new Uint8Array(await blob.slice(0, 12).arrayBuffer());
+    const q = (o, n) => String.fromCharCode(...f.slice(o, o + n));
+    let t = '';
+    if (q(4, 4) === 'ftyp') t = 'audio/mp4';
+    else if (q(0, 4) === 'RIFF') t = 'audio/wav';
+    else if (q(0, 4) === 'OggS') t = 'audio/ogg';
+    else if (q(0, 4) === 'fLaC') t = 'audio/flac';
+    else if (f[0] === 0xFF && (f[1] & 0xF6) === 0xF0) t = 'audio/aac';
+    else if (q(0, 3) === 'ID3' || (f[0] === 0xFF && (f[1] & 0xE0) === 0xE0)) t = 'audio/mpeg';
+    else if (!blob.type || blob.type === 'audio/mp3' || blob.type === 'application/octet-stream') t = 'audio/mpeg';
+    else return blob;
+    return blob.type === t ? blob : blob.slice(0, blob.size, t);
+  } catch(e){ return blob; }
+}
+async function probeLocal(id){
+  let blob = blobs[id];
+  if (!blob){ try { blob = await idbGet(id); } catch(e){} if (blob) blobs[id] = blob; }
+  if (!blob) return;
+  applyDur(id, await probeDuration(blob));
+}
+function locate(t){
+  let acc = 0;
+  for (let i = 0; i < curTracks.length; i++){
+    const d = curTracks[i].d || 0;
+    if (t < acc + d || i === curTracks.length - 1) return {i, off:Math.max(0, t - acc)};
+    acc += d;
+  }
+  return {i:0, off:t};
+}
+function seekGlobal(t){
+  const {i, off} = locate(t);
+  if (i === curTrk){ try { au.currentTime = off; } catch(e){} }
+  else setTrack(i, off, !au.paused || wantPlay);
+}
+const E = {
+  time(){ try { return eng === 'audio' ? baseOf(curTrk) + (au.currentTime || 0) : (yt.getCurrentTime() || 0); } catch(e){ return 0; } },
+  dur(){ try { return eng === 'audio' ? totalOf() : (yt.getDuration() || 0); } catch(e){ return 0; } },
+  st(){ try { return eng === 'audio' ? (au.paused ? 2 : 1) : yt.getPlayerState(); } catch(e){ return -1; } },
+  seek(t){ try { eng === 'audio' ? seekGlobal(t) : yt.seekTo(t, true); } catch(e){} },
+  setRate(r){ try { if (eng === 'audio'){ au.defaultPlaybackRate = r; au.playbackRate = r; } else yt.setPlaybackRate(r); } catch(e){} }
+};
+const PLACEHOLDER = (() => {
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 512;
+    const x = c.getContext('2d'), g = x.createLinearGradient(0, 0, 512, 512);
+    g.addColorStop(0, '#2b3b58'); g.addColorStop(1, '#0c1730'); x.fillStyle = g; x.fillRect(0, 0, 512, 512);
+    x.fillStyle = '#f7941d'; x.beginPath(); x.arc(256, 214, 92, 0, Math.PI * 2); x.fill();
+    x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.font = '700 104px system-ui, sans-serif'; x.fillText('JK', 256, 218);
+    x.fillStyle = 'rgba(255,255,255,.85)'; x.font = '600 38px system-ui, sans-serif'; x.fillText('Audiobooks', 256, 372);
+    return c.toDataURL('image/png');
+  } catch(e){ return ''; }
+})();
+const coverOf = (id, hi) => { const b = getLib()[id] || {}; return getCover(id) || (b.kind === 'audio' ? (b.art || PLACEHOLDER) : (hi ? thumbHi(id) : thumbLo(id))); };
+
+/* files you pick are kept on the device (IndexedDB) so they survive closing the tab */
+const idb = () => new Promise((res, rej) => { const r = indexedDB.open('katha', 1); r.onupgradeneeded = () => r.result.createObjectStore('files'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const idbPut = async (k, v) => { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('files', 'readwrite'); t.objectStore('files').put(v, k); t.oncomplete = res; t.onerror = () => rej(t.error); }); };
+const idbGet = async k => { const db = await idb(); return new Promise((res, rej) => { const r = db.transaction('files').objectStore('files').get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); };
+const idbDel = async k => { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('files', 'readwrite'); t.objectStore('files').delete(k); t.oncomplete = res; t.onerror = () => rej(t.error); }); };
+async function audioUrl(b){
+  let blob = blobs[b.id];
+  if (!blob){ try { blob = await idbGet(b.id); } catch(e){} }
+  if (blob){ blob = await typed(blob); blobs[b.id] = blob; }
+  return blob ? URL.createObjectURL(blob) : null;
+}
+async function setTrack(i, off, autoplay){
+  const id = vid, b = getLib()[id];
+  if (!b || !curTracks[i]) return;
+  const tr = curTracks[i]; curTrk = i;
+  const url = tr.local ? await audioUrl(b) : tr.u;
+  if (vid !== id || curTrk !== i) return;
+  if (!url){ toast("Can't find that audio on this device. Add it again."); return; }
+  if (au._obj){ try { URL.revokeObjectURL(au._obj); } catch(e){} au._obj = null; }
+  au._sw = Date.now();
+  try { au.pause(); } catch(e){}
+  au.src = url; au.dataset.id = id; if (tr.local) au._obj = url;
+  au.defaultPlaybackRate = rate; au.playbackRate = rate;
+  au.preservesPitch = true; au.webkitPreservesPitch = true;
+  au.load();
+  try { if (off > 0) au.currentTime = off; } catch(e){}
+  const go = () => { try { if (Math.abs(au.currentTime - off) > 1) au.currentTime = off; } catch(e){} paint(baseOf(i) + off, totalOf()); syncPos(); };
+  if (au.readyState >= 1) go(); else au.addEventListener('loadedmetadata', go, {once:true});
+  if (autoplay) au.play().catch(() => toast('Tap play to start.'));
+}
+/* iPhones only let a tap start audio, so the first tap "unlocks" the player for later */
+function unlockAudio(){
+  if (au._unlocked) return;
+  au._unlocked = true;
+  try { if (!silentUrl) silentUrl = silentWav(); au.dataset.id = ''; au.src = silentUrl; au.play().catch(() => {}); } catch(e){}
+}
+const aok = () => eng === 'audio' && vid && au.dataset.id === vid;
+au.addEventListener('playing', () => {
+  if (!aok()) return;
+  au._unlocked = true;
+  setPlaying(true); if (!listenStart) listenStart = Date.now();
+  setSession(true); bindSession(true); syncPos();
+  /* iOS can ignore info set before sound actually starts, so say it again once it is running */
+  [400, 1500, 4000].forEach(ms => setTimeout(() => {
+    if (!aok() || au.paused) return;
+    setSession(true); syncPos();
+    try { navigator.mediaSession.playbackState = 'playing'; } catch(e){}
+  }, ms));
+});
+au.addEventListener('pause', () => {
+  if (!aok() || Date.now() - (au._sw || 0) < 600) return;
+  /* iOS sometimes pauses the instant the screen locks; that isn't you, so carry on */
+  if (document.hidden && wantPlay && !au.ended && Date.now() - hiddenAt < 1500){ setTimeout(() => { if (wantPlay && au.paused) au.play().catch(() => {}); }, 150); return; }
+  wantPlay = false;                       /* paused by AirPods, a call or the lock screen: stay paused */
+  setPlaying(false); stopListen(); save(); syncPos();
+});
+au.addEventListener('seeked', () => { if (aok()){ syncPos(); if (!playing) paint(E.time(), E.dur()); } });
+au.addEventListener('ended', () => {
+  if (!aok()) return;
+  if (curTrk < curTracks.length - 1){ setTrack(curTrk + 1, 0, true); return; }
+  wantPlay = false; setPlaying(false); stopListen();
+  const l = getLib(); if (l[vid]){ l[vid].pos = l[vid].dur || l[vid].pos; setLib(l); }
+  renderDrawerIfOpen();
+});
+function syncDur(){
+  if (!aok()) return;
+  const d = auDuration(), l = getLib(), b = l[vid], tr = curTracks[curTrk];
+  if (b && d > 0 && tr && Math.abs((tr.d || 0) - d) > 0.5){
+    tr.d = d; if (b.tracks && b.tracks[curTrk]) b.tracks[curTrk].d = d;
+  }
+  if (b){
+    const tot = totalOf();
+    if (tot > 0 && Math.abs((b.dur || 0) - tot) > 0.5){ b.dur = tot; setLib(l); renderDrawerIfOpen(); }
+  }
+  if (!playing) paint(E.time(), totalOf());
+  syncPos();
+}
+['loadedmetadata', 'loadeddata', 'durationchange', 'canplay', 'canplaythrough', 'progress', 'playing'].forEach(ev => au.addEventListener(ev, syncDur));
+au.addEventListener('ratechange', () => { if (aok() && Math.abs(au.playbackRate - rate) > .01) au.playbackRate = rate; else if (aok()) syncPos(); });
+/* these fire even with the screen locked, unlike timers, so stats and your place keep saving */
+au.addEventListener('timeupdate', () => {
+  if (!aok()) return;
+  if (playing){ flushListen(); if (Date.now() - lastSave > 5000) save(); }
+  if (sleepEnd) checkSleep();
+});
+au.addEventListener('error', () => {
+  if (!aok()) return;
+  wantPlay = false; setPlaying(false);
+  toast("Couldn't play this audio. It must be a direct link to an mp3/m4a file, or pick the file from your phone.");
+});
+
+/* ---------- icons ---------- */
+const I = {
+  playS:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  pauseS:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+  dots:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>',
+  x:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  sun:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>',
+  moon:'<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>'
+};
+
+/* ---------- theme + greeting ---------- */
+function themeNow(){
+  const t = store.get('katha.theme', null);
+  if (t) return t;
+  const h = new Date().getHours();
+  return (h >= 19 || h < 6) ? 'night' : 'day';
+}
+function applyTheme(){
+  const t = themeNow();
+  document.documentElement.dataset.theme = t;
+  $('#themeColor').content = t === 'night' ? '#7d8593' : '#e4e3e6';
+  $('#themeBtn').innerHTML = t === 'night' ? I.sun : I.moon;
+}
+$('#themeBtn').onclick = () => { store.set('katha.theme', themeNow() === 'night' ? 'day' : 'night'); applyTheme(); };
+
+function greeting(){
+  const h = new Date().getHours();
+  return (h >= 5 && h < 12 ? 'Morning' : h >= 12 && h < 18 ? 'Afternoon' : 'Night') + ', JK';
+}
+setTimeout(() => {
+  const el = $('#hello'); el.classList.add('fade');
+  setTimeout(() => { el.textContent = greeting(); el.classList.remove('fade'); }, 320);
+}, 2600);
+
+/* ---------- silent audio keeps the page "playing" for the OS / lock screen ---------- */
+let keep = null;
+function silentWav(){
+  const sr = 8000, n = sr, b = new ArrayBuffer(44 + n), d = new DataView(b);
+  const w = (o, s) => [...s].forEach((c, i) => d.setUint8(o + i, c.charCodeAt(0)));
+  w(0,'RIFF'); d.setUint32(4, 36 + n, true); w(8,'WAVEfmt '); d.setUint32(16,16,true);
+  d.setUint16(20,1,true); d.setUint16(22,1,true); d.setUint32(24,sr,true); d.setUint32(28,sr,true);
+  d.setUint16(32,1,true); d.setUint16(34,8,true); w(36,'data'); d.setUint32(40,n,true);
+  new Uint8Array(b, 44).fill(128);
+  return URL.createObjectURL(new Blob([b], {type:'audio/wav'}));
+}
+function keepOn(){ if (eng !== 'yt' || ytNative) return; try { if (!keep){ keep = new Audio(silentWav()); keep.loop = true; } keep.play().catch(() => {}); } catch(e){} }
+function keepOff(){ try { keep && keep.pause(); } catch(e){} }
+
+/* ---------- YouTube player ---------- */
+let ytLoading = false;
+function ensureYT(){
+  if (ready || ytLoading) return;
+  ytLoading = true;
+  if (window.YT && window.YT.Player){ window.onYouTubeIframeAPIReady(); }
+  else {
+    const sc = document.createElement('script');
+    sc.src = 'https://www.youtube.com/iframe_api';
+    sc.onerror = () => { ytLoading = false; toast('Could not reach YouTube. Check your internet connection.'); };
+    document.head.appendChild(sc);
+  }
+  setTimeout(() => { if (!ready && eng === 'yt' && ytLoading) toast("YouTube player didn't load. Use an audio file instead."); }, 8000);
+}
+function destroyYT(){
+  try { if (yt && yt.destroy) yt.destroy(); } catch(e){}
+  yt = null; ready = false; ytLoading = false; pending = null;
+  const box = $('#vid'); if (box) box.innerHTML = '<div id="yt"></div>';
+}
+window.onYouTubeIframeAPIReady = () => {
+  if (eng !== 'yt' || yt) return;
+  const vars = {playsinline:1, rel:0, modestbranding:1, controls:1};
+  if (location.protocol.indexOf('http') === 0) vars.origin = location.origin;
+  yt = new YT.Player('yt', {
+    width:'100%', height:'100%', playerVars: vars,
+    events: {
+      onReady: () => { ready = true; if (pending){ const p = pending; pending = null; loadBook(p.id, p.autoplay); } },
+      onStateChange: onState,
+      onPlaybackRateChange: e => { if (eng === 'yt' && Math.abs(e.data - rate) > .01){ try { yt.setPlaybackRate(rate); } catch(x){} } },
+      onError: onErr
+    }
+  });
+};
+const errs = {
+  2:"That link doesn't look right.",
+  5:"This video can't play in an embedded player.",
+  100:"Video not found, or it's private.",
+  101:"The owner doesn't allow this video outside YouTube.",
+  150:"The owner doesn't allow this video outside YouTube.",
+  153:"YouTube won't play from a file opened directly. Host this file (GitHub Pages / Netlify) or open it through a local server."
+};
+function onErr(e){ toast(errs[e.data] || 'Could not play this video.'); setPlaying(false); stopListen(); }
+
+function parseLink(s){
+  s = (s || '').trim();
+  if (/^[\w-]{11}$/.test(s)) return {v:s, t:0};
+  let u;
+  try { u = new URL(/^https?:\/\//i.test(s) ? s : 'https://' + s); } catch(e){ return null; }
+  if (!/(^|\.)(youtube\.com|youtu\.be|youtube-nocookie\.com)$/i.test(u.hostname)) return null;
+  let v = u.searchParams.get('v');
+  if (!v){
+    const m = u.pathname.match(/^\/(?:shorts|embed|live|v)\/([\w-]{11})/);
+    if (m) v = m[1];
+  }
+  if (!v && u.hostname === 'youtu.be') v = u.pathname.slice(1, 12);
+  const t = parseInt(u.searchParams.get('t')) || 0;
+  if (v && /^[\w-]{11}$/.test(v)) return {v, t};
+  return null;
+}
+
+const AUDIO_EXT = /\.(mp3|m4a|m4b|aac|ogg|oga|opus|wav|flac|webm)(\?|#|$)/i;
+function parseAudioUrl(s){
+  s = (s || '').trim(); if (!s) return null;
+  let u; try { u = new URL(/^https?:\/\//i.test(s) ? s : 'https://' + s); } catch(e){ return null; }
+  if (u.hostname.indexOf('.') < 0) return null;
+  if (u.protocol === 'http:') u.protocol = 'https:';
+  const likely = AUDIO_EXT.test(u.pathname + u.search) || (/(^|\.)archive\.org$/.test(u.hostname) && /\/download\//.test(u.pathname));
+  return {url:u.href, likely};
+}
+const hash = s => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+const nameFromUrl = url => { try { return decodeURIComponent(new URL(url).pathname.split('/').pop() || '').replace(/\.[a-z0-9]{2,4}$/i, '').replace(/_+/g, ' ').trim(); } catch(e){ return ''; } };
+
+function playerVid(){
+  if (eng === 'audio') return au.dataset.id || null; try { const d = yt.getVideoData(); return d && d.video_id; } catch(e){ return null; } }
+
+async function loadBook(id, autoplay){
+  const lib = getLib(), b = lib[id];
+  if (!b) return;
+  vid = id; store.set('katha.last', id);
+  let from = b.pos || 0;
+  if (b.dur && b.dur - from < 15) from = 0;
+
+  if (b.kind === 'audio'){
+    eng = 'audio'; pending = null; rate = snap(rate); showRate();
+    destroyYT();
+    keepOff();
+    renderBook();
+    if (autoplay){ wantPlay = true; touch(id); unlockAudio(); } else wantPlay = false;
+    if (au.dataset.id !== id){
+      curTracks = tracksOf(b); curTrk = 0;
+      if (b.local && !(b.dur > 0)) probeLocal(id);
+      const {i, off} = locate(from);
+      await setTrack(i, off, autoplay);
+    } else if (autoplay){ au.play().catch(() => toast('Tap play to start.')); }
+    setSession(); bindSession();
+    return;
+  }
+
+  eng = 'yt'; rate = snap(rate); showRate(); setSession(); bindSession();
+  try { au.pause(); } catch(e){}
+  au.dataset.id = '';
+  renderBook();
+  if (!ready){ pending = {id, autoplay}; ensureYT(); if (autoplay) toast('Loading player…'); return; }
+  if (autoplay){
+    wantPlay = true; keepOn(); touch(id);
+    yt.loadVideoById({videoId:id, startSeconds:from});
+  } else {
+    wantPlay = false;
+    yt.cueVideoById({videoId:id, startSeconds:from});
+  }
+  try { yt.setPlaybackRate(rate); } catch(e){}
+}
+function touch(id){ const l = getLib(); if (l[id]){ l[id].t = Date.now(); setLib(l); } }
+
+function onState(e){
+  if (eng !== 'yt') return;
+  const S = YT.PlayerState;
+  if (e.data === S.PLAYING){
+    setPlaying(true); refreshMeta();
+    try { yt.setPlaybackRate(rate); } catch(x){}
+    if (!listenStart) listenStart = Date.now();
+    [300, 1200, 3500].forEach(ms => setTimeout(reassertSession, ms));
+  } else if (e.data === S.PAUSED || e.data === S.CUED || e.data === S.UNSTARTED){
+    setPlaying(false); stopListen(); save();
+    if (e.data === S.CUED) refreshMeta();
+  } else if (e.data === S.ENDED){
+    wantPlay = false; setPlaying(false); stopListen(); keepOff();
+    const l = getLib(); if (l[vid]){ l[vid].pos = l[vid].dur || l[vid].pos; setLib(l); }
+    renderDrawerIfOpen();
+  }
+}
+
+/* fill in blanks from YouTube without overwriting anything the user edited */
+function refreshMeta(){
+  let d; try { d = yt.getVideoData(); } catch(e){ return; }
+  if (!d || !d.video_id || d.video_id !== vid) return;
+  const lib = getLib(), b = lib[vid];
+  if (!b) return;
+  let ch = false;
+  if (!b.title && d.title){ b.title = d.title; ch = true; }
+  if (!b.author && d.author){ b.author = d.author; ch = true; }
+  const dur = yt.getDuration() || 0;
+  if (dur && b.dur !== dur){ b.dur = dur; ch = true; }
+  if (ch){ setLib(lib); renderBook(); renderDrawerIfOpen(); }
+}
+
+/* ---------- render the current book ---------- */
+function renderBook(){
+  const b = getLib()[vid];
+  const cover = $('#cover');
+  if (!b){
+    cover.classList.remove('has'); $('#title').textContent = ''; $('#author').textContent = ''; $('#engBadge').textContent = '';
+    $('#tint').classList.remove('on'); paint(0, 0); return;
+  }
+  const custom = getCover(vid), art = $('#art'), isA = b.kind === 'audio';
+  art.onload = () => {
+    const ar = Math.min(1, Math.max(.62, art.naturalWidth / art.naturalHeight));
+    cover.style.setProperty('--ar', ar);
+  };
+  art.onerror = () => { art.onerror = null; art.src = isA ? PLACEHOLDER : thumbLo(vid); };
+  art.src = coverOf(vid, true);
+  cover.classList.add('has');
+  $('#tint').style.backgroundImage = `url("${coverOf(vid)}")`;
+  $('#tint').classList.add('on');
+  $('#title').textContent = b.title || 'Untitled';
+  $('#author').textContent = b.author || '';
+  const eb = $('#engBadge'); eb.className = 'eng ' + (isA ? 'ok' : 'no');
+  eb.textContent = isA ? 'Audio · keeps playing when locked' : 'YouTube · tap for lock-screen help';
+  document.title = b.title || "JK's Audiobooks";
+  if (!playing) paint(b.pos || 0, b.dur || 0);
+  setSession();
+}
+
+function paint(t, d){
+  if (dragging) return;
+  seek.max = d || 100; seek.value = d ? t : 0;
+  seek.style.setProperty('--p', (d ? t / d * 100 : 0) + '%');
+  $('#cur').textContent = fmt(t);
+  $('#mid').textContent = d ? leftFmt((d - t) / rate) + ` (${rate}×)` : (eng === 'audio' && t > 0 ? 'Length unknown' : '');
+  $('#rem').textContent = d ? '-' + fmt((d - t) / rate) : '';
+}
+
+/* ---------- controls ---------- */
+function setPlaying(p){
+  playing = p;
+  $('#ico').innerHTML = p ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
+  $('#pp').setAttribute('aria-label', p ? 'Pause' : 'Play');
+  if ('mediaSession' in navigator && !(eng === 'yt' && ytNative)) navigator.mediaSession.playbackState = p ? 'playing' : 'paused';
+  if (p) wlOn(); else wlOff();
+  renderDrawerIfOpen();
+}
+function play(){
+  if (!vid){ toast('Add a book to begin.'); openBar(); return; }
+  if (eng === 'audio'){
+    wantPlay = true;
+    if (au.dataset.id !== vid){ loadBook(vid, true); return; }
+    touch(vid); au.play().catch(() => toast('Tap play again.')); return;
+  }
+  if (!ready){ pending = {id:vid, autoplay:true}; ensureYT(); toast('Loading player…'); return; }
+  wantPlay = true; keepOn();
+  if (playerVid() !== vid){ loadBook(vid, true); return; }
+  touch(vid); yt.playVideo();
+}
+function pause(){
+  if (eng === 'audio'){ wantPlay = false; au.pause(); stopListen(); save(); return; }
+  if (!ready) return; wantPlay = false; yt.pauseVideo(); keepOff(); stopListen(); save();
+}
+function toggle(){ if (!vid || !live()){ play(); return; } E.st() === 1 ? pause() : play(); }
+function seekTo(t){
+  if (!vid || !live()) return;
+  t = Math.max(0, t); E.seek(t);
+  const d = E.dur() || 0;
+  paint(t, d);
+  const l = getLib(); if (l[vid]){ l[vid].pos = t; if (d > 100) l[vid].dur = d; setLib(l); }
+  syncPos();
+}
+function skip(s){
+  if (!vid || !live()) return;
+  const d = E.dur();
+  seekTo(Math.min(d ? d - 1 : 1e9, E.time() + s));
+}
+$('#pp').onclick = toggle;
+$('#back').onclick = () => skip(-15);
+$('#fwd').onclick = () => skip(15);
+$('#vidBack').onclick = () => skip(-15);
+$('#vidFwd').onclick = () => skip(15);
+$('#prev').onclick = () => jumpClip(-1);
+$('#next').onclick = () => jumpClip(1);
+
+const seek = $('#seek');
+seek.addEventListener('input', () => {
+  dragging = true;
+  const d = +seek.max || 1, t = +seek.value;
+  seek.style.setProperty('--p', (t / d * 100) + '%');
+  $('#cur').textContent = fmt(t);
+  $('#mid').textContent = leftFmt((d - t) / rate) + ` (${rate}×)`;
+  $('#rem').textContent = '-' + fmt((d - t) / rate);
+});
+seek.addEventListener('change', () => { dragging = false; seekTo(+seek.value); });
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space'){ e.preventDefault(); toggle(); }
+  if (e.code === 'ArrowLeft') skip(-15);
+  if (e.code === 'ArrowRight') skip(15);
+});
+
+/* speed (slider) */
+function showRate(){ $('#speedv').textContent = rate + '×'; $('#speed').classList.toggle('on', rate !== 1); }
+function applyRate(r){
+  rate = snap(Math.round(r * 100) / 100);
+  store.set('katha.rate', rate); showRate();
+  if (vid && live()) E.setRate(rate);
+  const d = E.dur(); if (d) paint(E.time(), d);
+  syncPos();
+}
+function setFill(el){ const mn = +el.min, mx = +el.max; el.style.setProperty('--p', ((+el.value - mn) / (mx - mn) * 100) + '%'); }
+function openSpeed(){
+  const A = eng === 'audio', min = A ? 0.5 : 0.75, max = A ? 3 : 2, step = A ? 0.05 : 0.25;
+  const presets = A ? [1, 1.25, 1.5, 1.7, 2] : [1, 1.25, 1.5, 1.75, 2];
+  $('#sheet').dataset.view = 'speed';
+  $('#sheet').innerHTML = `<div class="sh-h">Playback speed</div><div class="bigval" id="sv">${rate}×</div>
+    <input type="range" id="sSlider" min="${min}" max="${max}" step="${step}" value="${rate}" aria-label="Speed">
+    <div class="ticks"><span>${min}×</span><span>${max}×</span></div>
+    <div class="chiprow">${presets.map(p => `<button class="chip ${p === rate ? 'on' : ''}" data-act="spd" data-v="${p}">${p}×</button>`).join('')}</div>
+    ${A ? '' : '<div class="note">YouTube only allows fixed steps. Audio files and free audiobooks allow any speed.</div>'}
+    <button class="primary" data-act="cancel">Done</button>`;
+  setFill($('#sSlider')); showSheet();
+}
+$('#speed').onclick = openSpeed;
+showRate();
+
+/* sleep timer (slider) */
+let sleepEnd = store.get('katha.sleepEnd', 0), sleepT = null;
+if (sleepEnd <= Date.now()){ sleepEnd = 0; store.set('katha.sleepEnd', 0); }
+function checkSleep(){
+  if (sleepEnd && Date.now() >= sleepEnd){
+    sleepEnd = 0; store.set('katha.sleepEnd', 0); clearTimeout(sleepT);
+    pause(); sleepLabel(); toast('Timer ended, paused.');
+  }
+}
+function setSleep(min){
+  clearTimeout(sleepT);
+  if (min > 0){
+    sleepEnd = Date.now() + min * 60000; store.set('katha.sleepEnd', sleepEnd);
+    sleepT = setTimeout(checkSleep, min * 60000 + 200);
+  } else { sleepEnd = 0; store.set('katha.sleepEnd', 0); }
+  sleepLabel();
+}
+function sleepLabel(){
+  $('#sleepl').textContent = sleepEnd ? Math.max(1, Math.ceil((sleepEnd - Date.now()) / 60000)) + ' min' : 'Timer';
+  $('#sleep').classList.toggle('on', !!sleepEnd);
+}
+function openTimer(){
+  const left = sleepEnd ? Math.max(1, Math.ceil((sleepEnd - Date.now()) / 60000)) : 0;
+  $('#sheet').dataset.view = 'timer';
+  $('#sheet').innerHTML = `<div class="sh-h">Sleep timer</div><div class="bigval" id="tv">${left ? left + ' min' : 'Off'}</div>
+    <input type="range" id="tSlider" min="0" max="180" step="5" value="${Math.min(180, left)}" aria-label="Sleep timer">
+    <div class="ticks"><span>Off</span><span>180 min</span></div>
+    <div class="chiprow">${[0, 15, 30, 45, 60, 90].map(m => `<button class="chip" data-act="slp" data-v="${m}">${m ? m + ' min' : 'Off'}</button>`).join('')}</div>
+    <button class="primary" data-act="cancel">Done</button>`;
+  setFill($('#tSlider')); showSheet();
+}
+$('#sleep').onclick = openTimer;
+if (sleepEnd){ sleepT = setTimeout(checkSleep, sleepEnd - Date.now() + 200); }
+sleepLabel();
+
+
+/* ---------- progress loop + listening time ---------- */
+function flushListen(){
+  if (!listenStart) return;
+  const now = Date.now();
+  const s = Math.min(300, (now - listenStart) / 1000);
+  listenStart = now;
+  if (s > 0){ const k = dkey(); stats[k] = (stats[k] || 0) + s; }
+}
+function stopListen(){ flushListen(); listenStart = 0; }
+
+function update(){
+  if (!vid || !live()) return;
+  if (eng === 'audio' && aok() && !(E.dur() > 0)) syncDur();      /* length not known yet: keep asking */
+  const t = E.time(), d = E.dur();
+  if (playing) paint(t, d);
+  if (playing && eng === 'yt'){
+    try { if (Math.abs(yt.getPlaybackRate() - rate) > .01) E.setRate(rate); } catch(e){}
+  }
+  if (playing){ flushListen(); if (Date.now() - lastSave > 5000) save(); }
+  if (sleepEnd){ checkSleep(); sleepLabel(); }
+}
+setInterval(update, 500);
+
+function save(){
+  lastSave = Date.now();
+  store.set('katha.stats', stats);
+  if (!vid || !live()) return;
+  const t = E.time(), d = E.dur(), st = E.st();
+  const lib = getLib(), b = lib[vid];
+  if (!b || !(d > 0) || playerVid() !== vid || (st !== 1 && st !== 2)) return;
+  b.pos = t; b.dur = d;
+  setLib(lib);
+}
+window.addEventListener('pagehide', () => { stopListen(); save(); });
+
+/* ---------- link bar ---------- */
+function openBar(){ $('#lbClose').classList.toggle('hide', !Object.keys(getLib()).length); $('#linkbar').classList.remove('min'); setTimeout(() => $('#link').focus(), 50); }
+function minBar(){ $('#linkbar').classList.add('min'); $('#link').value = ''; $('#link').blur(); }
+$('#lbOpen').onclick = openBar;
+$('#lbClose').onclick = minBar;
+$('#go').onclick = () => beginAdd($('#link').value);
+$('#link').addEventListener('keydown', e => { if (e.key === 'Enter') beginAdd($('#link').value); });
+$('#link').addEventListener('paste', e => {
+  const txt = (e.clipboardData || window.clipboardData).getData('text');
+  const pa = parseAudioUrl(txt);
+  if (parseLink(txt) || (pa && pa.likely)){ e.preventDefault(); $('#link').value = txt; beginAdd(txt); }
+});
+
+/* ---------- add / edit details ---------- */
+async function fetchMeta(id){
+  const u = 'https://www.youtube.com/watch?v=' + id;
+  const tries = ['https://www.youtube.com/oembed?format=json&url=' + encodeURIComponent(u),
+                 'https://noembed.com/embed?url=' + encodeURIComponent(u)];
+  for (const url of tries){
+    try {
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 4500);
+      const r = await fetch(url, {signal:ctl.signal}); clearTimeout(to);
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (j && j.title) return {title:j.title, author:j.author_name || ''};
+    } catch(e){}
+  }
+  return null;
+}
+
+function beginAdd(raw){
+  const p = parseLink(raw);
+  if (p){
+    const b = getLib()[p.v];
+    draft = {mode:'add', kind:'yt', id:p.v, t:p.t, cover:getCover(p.v) || null, isNew:!b};
+    renderDetails(b || {title:'', author:''});
+    if (!b){
+      fetchMeta(p.v).then(m => {
+        if (!draft || draft.id !== p.v) return;
+        const ti = $('#fTitle'), aa = $('#fAuthor');
+        if (!ti) return;
+        ti.placeholder = 'Title'; aa.placeholder = 'Author';
+        if (m){ if (!ti.value) ti.value = m.title; if (!aa.value) aa.value = m.author; }
+      });
+    }
+    return;
+  }
+  const pa = parseAudioUrl(raw);
+  if (!pa){ toast('Paste a YouTube link or a direct audio link (mp3, m4a).'); return; }
+  const id = 'u_' + hash(pa.url), b = getLib()[id];
+  draft = {mode:'add', kind:'audio', id, src:pa.url, cover:getCover(id) || null, isNew:!b};
+  renderDetails(b || {title:nameFromUrl(pa.url), author:''});
+}
+$('#pickAudio').onclick = () => $('#afile').click();
+$('#afile').addEventListener('change', async e => {
+  const f0 = e.target.files && e.target.files[0]; e.target.value = '';
+  if (!f0) return;
+  const f = await typed(f0);
+  const id = 'f_' + Date.now().toString(36);
+  blobs[id] = f;
+  draft = {mode:'add', kind:'audio', id, file:f, cover:null, isNew:true};
+  renderDetails({title:f0.name.replace(/\.[^.]+$/, '').replace(/_+/g, ' ').trim(), author:''});
+});
+function editBook(id){
+  const b = getLib()[id]; if (!b) return;
+  draft = {mode:'edit', id, kind:b.kind === 'audio' ? 'audio' : 'yt', art:b.art || null, cover:getCover(id) || null, isNew:false};
+  renderDetails(b);
+}
+
+function openYtTips(){
+  const b = getLib()[vid]; if (!b || b.kind === 'audio') return;
+  const t = Math.floor(E.time());
+  $('#sheet').dataset.view = 'yt';
+  $('#sheet').innerHTML = `<div class="sh-h">YouTube with the screen locked</div>
+    <div class="note" style="text-align:left;margin:0 0 6px">The 15-second buttons are available directly on the player now. iOS does not let this site force a YouTube embed to keep playing after you minimise or lock the site.</div>
+    <ol class="steps"><li>Use the ↶15 / ↷15 buttons on the player to jump 15 seconds.</li><li>For reliable background playback, use a direct audio file/link or open the video in the YouTube app.</li></ol>
+    <div class="tg"><span>Keep screen on while playing</span><button class="chip ${keepAwake ? 'on' : ''}" data-act="tgAwake">${keepAwake ? 'On' : 'Off'}</button></div>
+    <div class="tg"><span>Lock screen shows</span><div class="chiprow"><button class="chip ${ytNative ? 'on' : ''}" data-act="natYes">YouTube's own</button><button class="chip ${ytNative ? '' : 'on'}" data-act="natNo">My title</button></div></div>
+    <a class="primary linkbtn" href="https://youtu.be/${esc(vid)}?t=${t}" onclick="pause()">Open in the YouTube app</a>
+    <button class="ghost" data-act="cancel">Done</button>`;
+  showSheet();
+}
+function openAudioInfo(){
+  const bl = blobs[vid], d = au.duration;
+  const rows = [
+    ['File type', bl ? (bl.type || 'none') : 'link / not loaded'],
+    ['File size', bl ? (bl.size / 1048576).toFixed(1) + ' MB' : '-'],
+    ['Length the app found', E.dur() ? fmt(E.dur()) : 'not found'],
+    ['Length the phone reports', isFinite(d) && d > 0 ? fmt(d) : String(d)],
+    ['Ready state', au.readyState + ' / 4'],
+    ['Error', au.error ? 'code ' + au.error.code : 'none'],
+    ['Lock screen info', ('mediaSession' in navigator && navigator.mediaSession.metadata) ? 'set' : 'not set']
+  ];
+  $('#sheet').dataset.view = 'audioinfo';
+  $('#sheet').innerHTML = `<div class="sh-h">Audio details</div>` + rows.map(r => `<div class="tg"><span>${r[0]}</span><span>${esc(r[1])}</span></div>`).join('') + `<button class="primary" data-act="cancel">Done</button>`;
+  showSheet();
+}
+$('#engBadge').onclick = () => { if (!vid) return; if (eng === 'yt') openYtTips(); else openAudioInfo(); };
+function playerInfo(){
+  if (eng !== 'audio') return 'Playing through the YouTube player (stops when you leave the page).';
+  const d = E.dur();
+  return 'Audio player · length ' + (d ? fmt(d) : 'unknown') + (au.error ? ' · error ' + au.error.code : '') + ' · ' + (au.paused ? 'paused' : 'playing');
+}
+function parseTotal(str){                       /* "7:45:00", "7:45" (h:mm), "7h 45m" -> seconds */
+  str = (str || '').trim().toLowerCase(); if (!str) return 0;
+  if (/[hm]/.test(str)){ const h = +(str.match(/([\d.]+)\s*h/) || [])[1] || 0, m = +(str.match(/([\d.]+)\s*m/) || [])[1] || 0; return Math.round(h * 3600 + m * 60); }
+  const p = str.split(':').map(Number); if (p.some(isNaN)) return 0;
+  return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p.length === 2 ? p[0] * 3600 + p[1] * 60 : p[0] * 60;
+}
+function renderDetails(b){
+  const d = draft;
+  closeDrawer();
+  $('#sheet').innerHTML = `
+    <div class="sh-h">${d.mode === 'add' ? 'Add audiobook' : 'Title details'}</div>
+    <div class="dcov">
+      <div class="dc"><img id="dimg" alt="Cover"></div>
+      <div class="dbtns">
+        <button class="pill" data-act="pick">Choose from Photos</button>
+        <button class="pill" data-act="ytcover">${d.kind === 'audio' ? 'Remove cover' : 'Use YouTube cover'}</button>
+      </div>
+    </div>
+    <label class="fl">Title<input id="fTitle" value="${esc(b.title)}" placeholder="${d.isNew && d.kind !== 'audio' ? 'Getting title from YouTube…' : 'Title'}" autocomplete="off"></label>
+    <label class="fl">Author<input id="fAuthor" value="${esc(b.author)}" placeholder="${d.isNew && d.kind !== 'audio' ? 'Getting author…' : 'Author'}" autocomplete="off"></label>
+    ${d.kind === 'audio' && !(b.tracks && b.tracks.length > 1) ? `<label class="fl">Total length (only if the app can't find it)<input id="fLen" value="${b.durManual && b.dur ? esc(fmt(b.dur)) : ''}" placeholder="e.g. 7:45:00" inputmode="numeric" autocomplete="off"></label>` : ''}
+    ${d.mode === 'edit' && d.id === vid ? `<div class="note" style="text-align:left;margin:0 0 8px">${esc(playerInfo())}</div>` : ''}
+    <button class="primary" data-act="submit">${d.mode === 'add' ? 'Start listening' : 'Save'}</button>
+    <button class="ghost" data-act="cancel">Cancel</button>`;
+  setDetCover();
+  showSheet();
+}
+function setDetCover(){
+  const img = $('#dimg'); if (!img || !draft) return;
+  img.onerror = () => { img.onerror = null; img.src = draft.kind === 'audio' ? PLACEHOLDER : thumbLo(draft.id); };
+  img.src = draft.cover || (draft.kind === 'audio' ? (draft.art || PLACEHOLDER) : thumbHi(draft.id));
+}
+function readCover(file){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const s = Math.min(1, 640 / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', .86));
+      };
+      img.onerror = rej; img.src = r.result;
+    };
+    r.onerror = rej; r.readAsDataURL(file);
+  });
+}
+$('#file').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = '';
+  if (!f || !draft) return;
+  try { draft.cover = await readCover(f); setDetCover(); } catch(err){ toast("Couldn't read that photo."); }
+});
+
+function submitDetails(){
+  if (!draft) return;
+  const d = draft, lib = getLib();
+  const b = lib[d.id] || {id:d.id, pos:0, dur:0, t:Date.now()};
+  b.title = $('#fTitle').value.trim();
+  b.author = $('#fAuthor').value.trim();
+  if (d.mode === 'add' && d.t) b.pos = d.t;
+  if (d.kind === 'audio'){
+    b.kind = 'audio'; if (d.src) b.src = d.src;
+    if (d.art) b.art = d.art;
+    if (d.tracks){ b.tracks = d.tracks; b.dur = d.tracks.reduce((a, t) => a + (t.d || 0), 0); }
+    const lenEl = $('#fLen');
+    if (lenEl){ const v = parseTotal(lenEl.value); if (v > 0){ b.dur = v; b.durManual = true; } else if (!lenEl.value.trim() && b.durManual){ b.durManual = false; b.dur = 0; } }
+    if (d.file){ b.local = true; probeDuration(d.file).then(x => applyDur(d.id, x)); idbPut(d.id, d.file).catch(() => toast("Couldn't keep that file on this device (storage may be full).")); }
+  }
+  lib[d.id] = b; setLib(lib);
+  if (d.cover) setCover(d.id, d.cover); else delCover(d.id);
+  const mode = d.mode, id = d.id;
+  closeSheet(); draft = null;
+  if (mode === 'add'){ minBar(); loadBook(id, true); }
+  else { if (id === vid){ if (b.durManual && curTracks.length === 1) curTracks[0].d = b.dur; renderBook(); syncPos(); } renderDrawerIfOpen(); toast('Saved'); }
+}
+
+/* ---------- clips (bookmarks) ---------- */
+const getClips = () => vid ? store.get(bmKey(vid), []) : [];
+function addClip(){
+  if (!vid || !live()){ toast('Start a book first.'); return; }
+  const t = Math.floor(E.time()), l = getClips();
+  l.push({t}); l.sort((a, b) => a.t - b.t); store.set(bmKey(vid), l);
+  toast('Clip saved at ' + fmt(t));
+  if ($('#sheet').dataset.view === 'clips') renderClips();
+}
+function jumpClip(dir){
+  if (!vid || !live()) return;
+  const l = getClips(); if (!l.length){ toast('No clips yet. Tap + Clip to save a spot.'); return; }
+  const t = E.time();
+  if (dir > 0){ const n = l.find(c => c.t > t + 1); n ? seekTo(n.t) : toast('No later clips.'); }
+  else { const p = [...l].reverse().find(c => c.t < t - 3); p ? seekTo(p.t) : seekTo(0); }
+}
+function renderClips(){
+  const l = getClips();
+  let h = `<div class="sh-h">Clips</div><button class="add" data-act="addclip">+ Clip at ${fmt(vid && live() ? E.time() : 0)}</button>`;
+  if (!l.length) h += `<div class="empty">No clips for this book yet.</div>`;
+  l.forEach((c, i) => { h += `<div class="row"><button class="go" data-act="jump" data-t="${c.t}"><div class="tt">${fmt(c.t)}</div><div class="ss">Tap to jump here</div></button><button class="x" data-act="delclip" data-i="${i}" aria-label="Delete clip">×</button></div>`; });
+  $('#sheet').innerHTML = h; $('#sheet').dataset.view = 'clips'; showSheet();
+}
+$('#clip').onclick = addClip;
+$('#pClips').onclick = () => { if (!vid){ toast('Start a book first.'); return; } closeDrawer(); renderClips(); };
+$('#pDetails').onclick = () => { if (!vid){ toast('Start a book first.'); return; } editBook(vid); };
+$('#pLog').onclick = () => { dTab = 'stats'; openDrawer(); };
+
+/* ---------- sheet + drawer plumbing ---------- */
+function showSheet(){ $('#sheet').classList.add('open'); $('#scrim').classList.add('open'); }
+function closeSheet(){ $('#sheet').classList.remove('open'); $('#sheet').dataset.view = ''; if (!$('#drawer').classList.contains('open')) $('#scrim').classList.remove('open'); }
+function openDrawer(){ closeSheet(); renderDrawer(); $('#drawer').classList.add('open'); $('#scrim').classList.add('open'); }
+function closeDrawer(){ $('#drawer').classList.remove('open'); if (!$('#sheet').classList.contains('open')) $('#scrim').classList.remove('open'); }
+$('#scrim').onclick = () => { if ($('#sheet').classList.contains('open')){ closeSheet(); draft = null; } else closeDrawer(); };
+$('#menuBtn').onclick = () => { dTab = 'lib'; openDrawer(); };
+function renderDrawerIfOpen(){ if ($('#drawer').classList.contains('open') && dTab !== 'find') renderDrawer(); }
+
+$('#sheet').addEventListener('input', e => {
+  const el = e.target;
+  if (el.id === 'sSlider'){ setFill(el); $('#sv').textContent = (+el.value) + '×'; applyRate(+el.value); }
+  if (el.id === 'tSlider'){ setFill(el); $('#tv').textContent = +el.value ? el.value + ' min' : 'Off'; }
+});
+$('#sheet').addEventListener('change', e => { if (e.target.id === 'tSlider') setSleep(+e.target.value); });
+$('#sheet').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'spd'){
+    const v = +b.dataset.v; applyRate(v);
+    const sl = $('#sSlider'); sl.value = v; setFill(sl); $('#sv').textContent = v + '×';
+    $('#sheet').querySelectorAll('.chip').forEach(c => c.classList.toggle('on', +c.dataset.v === v));
+  }
+  if (a === 'slp'){
+    const v = +b.dataset.v; setSleep(v);
+    const sl = $('#tSlider'); sl.value = v; setFill(sl); $('#tv').textContent = v ? v + ' min' : 'Off';
+  }
+  if (a === 'tgAwake'){ keepAwake = !keepAwake; store.set('katha.awake', keepAwake); if (keepAwake && playing) wlOn(); else wlOff(); openYtTips(); }
+  if (a === 'natYes' || a === 'natNo'){ ytNative = a === 'natYes'; store.set('katha.ytnative', ytNative); setSession(); bindSession(); if (!ytNative && playing) { reassertSession(); } openYtTips(); }
+  if (a === 'pick') $('#file').click();
+  if (a === 'ytcover'){ if (draft){ draft.cover = null; setDetCover(); } }
+  if (a === 'submit') submitDetails();
+  if (a === 'cancel'){ closeSheet(); draft = null; }
+  if (a === 'addclip'){ addClip(); renderClips(); }
+  if (a === 'jump'){ seekTo(+b.dataset.t); if (!playing) play(); closeSheet(); }
+  if (a === 'delclip'){ const l = getClips(); l.splice(+b.dataset.i, 1); store.set(bmKey(vid), l); renderClips(); }
+  if (a === 'edit'){ editBook(b.dataset.id); }
+  if (a === 'remove'){ b.dataset.act = 'remove2'; b.textContent = 'Tap again to remove for good'; }
+  else if (a === 'remove2'){ removeBook(b.dataset.id); }
+});
+
+function removeBook(id){
+  const lib = getLib(), gone = lib[id]; delete lib[id]; setLib(lib);
+  if (gone && gone.local){ delete blobs[id]; idbDel(id).catch(() => {}); }
+  delCover(id); try { localStorage.removeItem(bmKey(id)); } catch(e){}
+  closeSheet();
+  if (id === vid){
+    if (eng === 'audio'){ try { au.pause(); au.removeAttribute('src'); au.dataset.id = ''; } catch(e){} }
+    else if (ready){ try { yt.stopVideo(); } catch(e){} }
+    wantPlay = false; keepOff(); setPlaying(false); stopListen();
+    try { if ('mediaSession' in navigator) navigator.mediaSession.metadata = null; } catch(e){} sessKey = '';
+    const next = Object.values(lib).sort((a, b) => b.t - a.t)[0];
+    vid = null;
+    if (next) loadBook(next.id, false); else { store.set('katha.last', null); renderBook(); openBar(); }
+  }
+  renderDrawerIfOpen();
+}
+
+/* ---------- drawer: library + listening time ---------- */
+function renderDrawer(){
+  let h = `<div class="dr-h"><span class="brand">JK's Audiobooks</span><button class="ib" data-act="closeD" aria-label="Close">${I.x}</button></div>
+    <div class="seg"><button data-dt="lib" class="${dTab === 'lib' ? 'on' : ''}">Library</button><button data-dt="stats" class="${dTab === 'stats' ? 'on' : ''}">Listening</button><button data-dt="find" class="${dTab === 'find' ? 'on' : ''}">Find</button></div>
+    <div class="dr-b">${dTab === 'lib' ? libHTML() : dTab === 'find' ? findHTML() : statsHTML()}</div>`;
+  $('#drawer').innerHTML = h;
+}
+const findState = {q:'', docs:null, busy:false};
+function findRowsHTML(){
+  if (findState.busy) return '<div class="empty">Searching…</div>';
+  if (!findState.docs) return '<div class="empty">Search by title or author, like Dracula or Austen.</div>';
+  if (!findState.docs.length) return '<div class="empty">No free audiobooks found for that.</div>';
+  const one = v => Array.isArray(v) ? v[0] : (v || '');
+  return findState.docs.map(d => {
+    const ti = esc(one(d.title)), cr = esc(one(d.creator));
+    return `<div class="bk"><div class="bk-main"><img class="th" src="https://archive.org/services/img/${esc(d.identifier)}" alt=""><div class="bi"><div class="bt">${ti}</div>${cr ? `<div class="ba">By ${cr}</div>` : ''}</div></div><button class="pill" data-act="findadd" data-id="${esc(d.identifier)}" data-t="${ti}" data-a="${cr}">Add</button></div>`;
+  }).join('');
+}
+function findHTML(){
+  return `<div class="findbar"><input id="findQ" type="search" enterkeyhint="search" placeholder="Search free audiobooks" value="${esc(findState.q)}" autocomplete="off"><button class="lb-go" data-act="find">Search</button></div>
+    <div class="note" style="margin:0 0 10px;text-align:left">Free audiobooks read by volunteers (LibriVox), found through the Internet Archive. These play in the background with lock screen controls.</div>
+    <div id="findRes">${findRowsHTML()}</div>`;
+}
+async function doSearch(){
+  const inp = $('#findQ'); if (!inp) return;
+  const q = inp.value.replace(/[^\w\s'-]/g, ' ').trim(); if (!q) return;
+  findState.q = q; findState.busy = true; $('#findRes').innerHTML = findRowsHTML();
+  try {
+    const query = `collection:librivoxaudio AND (title:(${q}) OR creator:(${q}))`;
+    const url = 'https://archive.org/advancedsearch.php?q=' + encodeURIComponent(query) + '&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=creator&rows=25&sort%5B%5D=downloads+desc&output=json';
+    const r = await fetch(url); const j = await r.json();
+    findState.docs = (j.response && j.response.docs) || [];
+  } catch(e){ findState.docs = null; toast("Couldn't reach the Internet Archive. Check your connection."); }
+  findState.busy = false;
+  if ($('#findRes')) $('#findRes').innerHTML = findRowsHTML();
+}
+const parseLen = v => { if (v == null) return 0; const s = String(v); if (s.indexOf(':') > 0){ return s.split(':').reduce((a, x) => a * 60 + (parseFloat(x) || 0), 0); } return parseFloat(s) || 0; };
+async function addFromArchive(ident, title, creator){
+  toast('Getting chapters…');
+  let tracks = [];
+  try {
+    const r = await fetch('https://archive.org/metadata/' + encodeURIComponent(ident)); const j = await r.json();
+    const files = j.files || [];
+    for (const f of ['64Kbps MP3', '128Kbps MP3', 'VBR MP3', 'MP3']){
+      const pick = files.filter(x => x.format === f);
+      if (pick.length){
+        pick.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric:true}));
+        tracks = pick.map(x => ({u:'https://archive.org/download/' + encodeURIComponent(ident) + '/' + encodeURI(x.name), d:parseLen(x.length)}));
+        break;
+      }
+    }
+  } catch(e){ toast("Couldn't load that book. Try again."); return; }
+  if (!tracks.length){ toast('No playable audio found for that book.'); return; }
+  const id = 'a_' + hash(ident), ex = getLib()[id];
+  draft = {mode:'add', kind:'audio', id, tracks, art:'https://archive.org/services/img/' + encodeURIComponent(ident), cover:getCover(id) || null, isNew:!ex};
+  renderDetails(ex || {title, author:creator});
+}
+$('#drawer').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'findQ') doSearch(); });
+
+function libHTML(){
+  const items = Object.values(getLib()).sort((a, b) => b.t - a.t);
+  if (!items.length) return `<div class="empty">Books you add will show up here, with your place saved.</div>`;
+  let h = `<div class="cnt">${items.length} title${items.length > 1 ? 's' : ''}</div>`;
+  items.forEach(b => {
+    const pct = b.dur ? Math.min(100, (b.pos || 0) / b.dur * 100) : 0;
+    const left = !b.dur ? 'Not started' : (b.dur - (b.pos || 0) < 15 ? 'Finished' : leftFmt((b.dur - b.pos) / rate));
+    const cur = b.id === vid, pl = cur && playing, id = esc(b.id);
+    h += `<div class="bk ${cur ? 'cur' : ''}">
+      <button class="bk-main" data-act="open" data-id="${id}"><img class="th" src="${esc(coverOf(b.id))}" alt="">
+        <div class="bi"><div class="bt">${esc(b.title || 'Untitled')}</div>${b.author ? `<div class="ba">By ${esc(b.author)}</div>` : ''}
+        <div class="bm"><span class="bar"><i style="width:${pct}%"></i></span>${left}</div></div></button>
+      <button class="pl" data-act="rowplay" data-id="${id}" aria-label="${pl ? 'Pause' : 'Play'}">${pl ? I.pauseS : I.playS}</button>
+      <button class="ib" data-act="menu" data-id="${id}" aria-label="More">${I.dots}</button></div>`;
+  });
+  return h;
+}
+
+function computeStats(){
+  const keys = Object.keys(stats).filter(k => stats[k] > 0).sort();
+  const total = keys.reduce((a, k) => a + stats[k], 0);
+  const now = new Date(), today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const S = {total, today:stats[dkey()] || 0, daysListened:keys.length, books:Object.keys(getLib()).length};
+  let firstDate = today0;
+  if (keys.length){ const [y, m, d] = keys[0].split('-').map(Number); firstDate = new Date(y, m - 1, d); }
+  const days = Math.max(1, Math.round((today0 - firstDate) / 864e5) + 1);
+  S.dailyAvg = total / days;
+  S.last7 = [];
+  for (let i = 6; i >= 0; i--){
+    const d = new Date(today0); d.setDate(d.getDate() - i);
+    S.last7.push({label:'SMTWTFS'[d.getDay()], val:stats[dkey(d)] || 0, now:i === 0});
+  }
+  const byMonth = {};
+  keys.forEach(k => { const mk = k.slice(0, 7); byMonth[mk] = (byMonth[mk] || 0) + stats[k]; });
+  const months = [];
+  let y = firstDate.getFullYear(), m = firstDate.getMonth();
+  while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth())){
+    months.push({y, m, val:byMonth[y + '-' + String(m + 1).padStart(2, '0')] || 0});
+    m++; if (m > 11){ m = 0; y++; }
+  }
+  S.monthlyAvg = total / Math.max(1, months.length);
+  S.months = months.slice(-6).map(o => ({label:new Date(o.y, o.m, 1).toLocaleString('en', {month:'short'}), val:o.val, now:o.y === now.getFullYear() && o.m === now.getMonth()}));
+  S.range = S.months.length > 1 ? S.months[0].label + ' – ' + S.months[S.months.length - 1].label + ' ' + now.getFullYear() : now.toLocaleString('en', {month:'long', year:'numeric'});
+  return S;
+}
+function chart(items, avg){
+  const W = 320, H = 176, pad = 22, base = H - 26, top = 16;
+  const max = Math.max(60, ...items.map(i => i.val), avg) * 1.18;
+  const step = (W - 2 * pad) / items.length, bw = Math.min(34, step * .6);
+  let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Listening chart">`;
+  items.forEach((it, i) => {
+    const h = (base - top) * it.val / max, x = pad + step * i + (step - bw) / 2;
+    g += `<rect x="${x}" y="${base - h}" width="${bw}" height="${Math.max(h, it.val > 0 ? 3 : 0)}" rx="4" fill="${it.now ? '#6fa0ff' : '#8fb4ff'}" opacity="${it.now ? 1 : .7}"/>`;
+    if (it.val > 0) g += `<text x="${x + bw / 2}" y="${base - h - 5}" text-anchor="middle" font-size="10" fill="currentColor">${short(it.val)}</text>`;
+    g += `<text x="${x + bw / 2}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--mute)">${it.label}</text>`;
+  });
+  const ay = base - (base - top) * avg / max;
+  g += `<line x1="${pad - 10}" x2="${W - pad + 10}" y1="${base}" y2="${base}" stroke="var(--line)"/>`;
+  g += `<line x1="${pad - 10}" x2="${W - pad + 10}" y1="${ay}" y2="${ay}" stroke="currentColor" stroke-width="1.6" stroke-dasharray="1.5 5" stroke-linecap="round" opacity=".75"/></svg>`;
+  return g;
+}
+function statsHTML(){
+  const S = computeStats();
+  const hm = s => { const m = Math.round(s / 60); return {h:Math.floor(m / 60), m:m % 60}; };
+  const big = s => { const t = hm(s); return `<div class="bigt"><div><b>${t.h}</b><span>Hours</span></div><div><b>${t.m}</b><span>Minutes</span></div></div>`; };
+  const nice = s => { const t = hm(s); return t.h ? `${t.h}h ${t.m}m` : `${t.m}m`; };
+  const tabs = [['today', 'Today'], ['daily', 'Daily'], ['monthly', 'Monthly'], ['total', 'Total']];
+  let h = `<div class="stabs">${tabs.map(([k, l]) => `<button data-st="${k}" class="${sTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  if (sTab === 'today'){
+    h += `<div class="slabel">Today</div><div class="sdate">${new Date().toLocaleDateString('en', {month:'long', day:'numeric', year:'numeric'})}</div>${big(S.today)}`;
+    h += `<div class="note">Time you actually spent listening, so 1 hour at 1.5× counts as 1 hour.</div>`;
+  } else if (sTab === 'daily'){
+    h += `<div class="slabel">Daily average</div><div class="avg">${nice(S.dailyAvg)}</div><div class="slabel">Since you started</div>${chart(S.last7, S.dailyAvg)}<div class="note">Last 7 days. The dotted line is your daily average.</div>`;
+  } else if (sTab === 'monthly'){
+    h += `<div class="slabel">Monthly average</div><div class="avg">${nice(S.monthlyAvg)}</div><div class="slabel">${S.range}</div>${chart(S.months, S.monthlyAvg)}<div class="note">The dotted line is your monthly average.</div>`;
+  } else {
+    h += `<div class="slabel">Total listening time</div>${big(S.total)}<div class="facts"><div class="fact"><b>${S.daysListened}</b><span>days listened</span></div><div class="fact"><b>${S.books}</b><span>books in library</span></div></div>`;
+  }
+  return h;
+}
+
+$('#drawer').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.dt){ dTab = b.dataset.dt; renderDrawer(); return; }
+  if (b.dataset.st){ sTab = b.dataset.st; renderDrawer(); return; }
+  const a = b.dataset.act, id = b.dataset.id;
+  if (a === 'closeD') closeDrawer();
+  if (a === 'find') doSearch();
+  if (a === 'findadd') addFromArchive(id, b.dataset.t, b.dataset.a);
+  if (a === 'open'){ closeDrawer(); if (id !== vid) loadBook(id, false); }
+  if (a === 'rowplay'){
+    if (id === vid) toggle(); else { closeDrawer(); loadBook(id, true); }
+  }
+  if (a === 'menu'){
+    const bk = getLib()[id]; if (!bk) return;
+    closeDrawer();
+    $('#sheet').innerHTML = `<div class="sh-h">${esc(bk.title || 'Untitled')}</div>
+      <button class="opt" data-act="edit" data-id="${esc(id)}">Edit title, author and cover</button>
+      <button class="opt danger" data-act="remove" data-id="${esc(id)}">Remove from library</button>`;
+    showSheet();
+  }
+});
+
+/* ---------- lock screen / notification controls ---------- */
+let sessKey = '', bindKey = '';
+function setSession(force){
+  if (!('mediaSession' in navigator) || !vid) return;
+  const b = getLib()[vid]; if (!b) return;
+  if (eng === 'yt' && ytNative){
+    if (sessKey !== 'native'){ sessKey = 'native'; try { navigator.mediaSession.metadata = null; } catch(e){} }
+    return;
+  }
+  const custom = getCover(vid), isA = b.kind === 'audio';
+  const key = [vid, eng, b.title, b.author, b.art || '', custom ? custom.length : 0].join('|');
+  if (!force && key === sessKey) return;      /* unchanged: leave the lock screen alone */
+  sessKey = key;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title:b.title || 'Untitled', artist:b.author || '', album:"JK's Audiobooks",
+      artwork: custom ? ['96x96','192x192','384x384','512x512'].map(z => ({src:custom, sizes:z, type:'image/jpeg'}))
+             : isA ? ['96x96','192x192','384x384','512x512'].map(z => b.art ? ({src:b.art, sizes:z}) : ({src:PLACEHOLDER, sizes:z, type:'image/png'}))
+             : [{src:thumbLo(vid), sizes:'320x180', type:'image/jpeg'}]
+    });
+  } catch(e){}
+}
+function bindSession(force){
+  if (!('mediaSession' in navigator)) return;
+  const mode = (eng === 'yt' && ytNative) ? 'native' : 'ours';
+  if (!force && mode === bindKey) return;
+  bindKey = mode;
+  const h = (n, f) => { try { navigator.mediaSession.setActionHandler(n, f); } catch(e){} };
+  if (mode === 'native'){
+    /* hands off: the phone sends play / pause / skip straight to YouTube's player */
+    ['play','pause','seekbackward','seekforward','seekto','previoustrack','nexttrack'].forEach(n => h(n, null));
+    return;
+  }
+  h('play', play); h('pause', pause);
+  /* the iPhone lock screen shows 10-second buttons, so they skip 10 */
+  h('seekbackward', d => skip(-((d && d.seekOffset) || 10)));
+  h('seekforward', d => skip((d && d.seekOffset) || 10));
+  h('seekto', d => seekTo(d.seekTime * (eng === 'audio' ? rate : 1)));
+  /* if these exist, iPhone shows track buttons INSTEAD of the skip-seconds buttons */
+  h('previoustrack', null); h('nexttrack', null);
+}
+/* tells the lock screen where we are; only called when something changes, never on a timer */
+function syncPos(){
+  if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return;
+  if (eng === 'yt' && ytNative) return;
+  const d = E.dur(); if (!(d > 0)) return;
+  const r = (eng === 'audio' && rate > 0) ? rate : 1;      /* scaled so the lock screen counts down at your speed */
+  try { navigator.mediaSession.setPositionState({duration:d / r, playbackRate:r === 1 ? rate : 1, position:Math.max(0, Math.min(E.time(), d)) / r}); } catch(e){}
+}
+/* YouTube keeps trying to put its own title on the lock screen; in "My title" mode we take it back */
+function reassertSession(){
+  if (!playing || eng !== 'yt' || ytNative) return;
+  setSession(true); bindSession(true); keepOn();
+  try { navigator.mediaSession.playbackState = 'playing'; } catch(e){}
+}
+bindSession();
+
+/* if the phone pauses playback when the screen locks, try to nudge it back on */
+const resume = () => { try { eng === 'audio' ? au.play().catch(() => {}) : yt.playVideo(); } catch(e){} };
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden){
+    hiddenAt = Date.now();
+    save();
+    if (eng === 'yt') [300, 900, 1800, 3500].forEach(ms => setTimeout(() => { if (wantPlay && live() && E.st() === 2 && Date.now() - hiddenAt < 5000) resume(); }, ms));
+    else if (eng === 'audio') [300, 900, 1800, 3500].forEach(ms => setTimeout(() => { if (wantPlay && aok() && au.paused && Date.now() - hiddenAt < 5000) resume(); }, ms));
+  } else {
+    save(); checkSleep(); if (playing) wlOn();
+    if (vid && live()) E.setRate(rate);
+    if ((eng === 'yt' || aok()) && wantPlay && live() && E.st() === 2) resume();
+  }
+});
+
+/* ---------- boot: open on the last book ---------- */
+(function boot(){
+  applyTheme();
+  const lib = getLib(), last = store.get('katha.last', null);
+  const ids = Object.keys(lib).sort((a, b) => lib[b].t - lib[a].t);
+  const id = lib[last] ? last : ids[0];
+  if (id){
+    vid = id; eng = kindOf(id); renderBook(); $('#linkbar').classList.add('min');
+    if (eng === 'audio') loadBook(id, false); else { pending = {id, autoplay:false}; ensureYT(); }
+  } else { renderBook(); }
+  $('#lbClose').classList.toggle('hide', !id);
+})();
+</script>
+</body>
+</html>
